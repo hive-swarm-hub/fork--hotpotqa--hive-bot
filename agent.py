@@ -27,7 +27,7 @@ Instructions:
 2. Reason step-by-step to connect information across paragraphs.
 3. After your reasoning, output your final answer on the last line prefixed with "ANSWER: ".
 
-Your final answer should be as concise as possible — typically a few words, a name, a date, or a number. Do not include unnecessary articles or filler words unless they are part of a proper name."""},
+Your final answer should be as concise as possible — typically a few words, a name, a date, or a number. Do not include unnecessary articles or filler words unless they are part of a proper name. Copy the exact phrasing from the context when possible."""},
             {"role": "user", "content": f"Context:\n{ctx}\n\nQuestion: {question}"},
         ],
         temperature=0,
