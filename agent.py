@@ -80,16 +80,26 @@ Your final answer should be as concise as possible — typically a few words, a 
         {"role": "user", "content": f"Context:\n{ctx}\n\nQuestion: {question}"},
     ]
 
-    response = client.chat.completions.create(
+    # Get deterministic answer (temperature=0) plus diverse samples
+    det_response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=0,
+        max_tokens=256,
+    )
+    det_answer = extract_answer(det_response.choices[0].message.content.strip())
+
+    diverse_response = client.chat.completions.create(
         model=model,
         messages=messages,
         temperature=0.5,
         max_tokens=256,
-        n=5,
+        n=4,
     )
+    diverse_answers = [extract_answer(c.message.content.strip()) for c in diverse_response.choices]
 
-    answers = [extract_answer(c.message.content.strip()) for c in response.choices]
-    return best_answer(answers)
+    all_answers = [det_answer] + diverse_answers
+    return best_answer(all_answers)
 
 
 if __name__ == "__main__":
