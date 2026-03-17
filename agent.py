@@ -15,19 +15,36 @@ def solve(question: str, context: list[str]) -> str:
     """Answer a multi-hop question using the provided context."""
     client = OpenAI()
 
-    ctx = "\n\n".join(context)
+    ctx = "\n\n".join(f"[{i+1}] {c}" for i, c in enumerate(context))
 
     response = client.chat.completions.create(
         model=os.environ.get("SOLVER_MODEL", "gpt-4.1-nano"),
         messages=[
-            {"role": "system", "content": "Answer the question using the provided context. Give ONLY the answer, nothing else. Be concise — usually a few words."},
+            {"role": "system", "content": """You are a precise question-answering system. You answer multi-hop questions that require combining information from multiple paragraphs.
+
+Instructions:
+1. First, identify which paragraphs are relevant to the question.
+2. Reason step-by-step to connect information across paragraphs.
+3. After your reasoning, output your final answer on the last line prefixed with "ANSWER: ".
+
+Your final answer should be as concise as possible — typically a few words, a name, a date, or a number. Do not include unnecessary articles or filler words unless they are part of a proper name."""},
             {"role": "user", "content": f"Context:\n{ctx}\n\nQuestion: {question}"},
         ],
         temperature=0,
-        max_tokens=64,
+        max_tokens=256,
     )
 
-    return response.choices[0].message.content.strip()
+    text = response.choices[0].message.content.strip()
+
+    # Extract answer after "ANSWER:" prefix
+    for line in reversed(text.split("\n")):
+        line = line.strip()
+        if line.upper().startswith("ANSWER:"):
+            return line[len("ANSWER:"):].strip()
+
+    # Fallback: return the last non-empty line
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    return lines[-1] if lines else text
 
 
 if __name__ == "__main__":
