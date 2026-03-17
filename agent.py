@@ -94,7 +94,7 @@ Your final answer should be as concise as possible — typically a few words, a 
         messages=messages,
         temperature=0.5,
         max_tokens=256,
-        n=4,
+        n=6,
     )
     diverse_answers = [extract_answer(c.message.content.strip()) for c in diverse_response.choices]
 
